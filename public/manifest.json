@@ -1,0 +1,15 @@
+{
+  "name": "Dua Hati",
+  "short_name": "Dua Hati",
+  "description": "Ruang privat berdua: mood, lokasi, hari spesial, kenangan, dan peliharaan virtual.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF3F2",
+  "theme_color": "#250209",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,24 @@
+# ==== KONFIGURASI CLOUDFLARE WORKERS ====
+# GANTI: nama worker (jadi subdomain: <name>.<akun>.workers.dev)
+name = "dua-hati"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# File front-end (index.html, manifest.json, sw.js, icon.svg) disajikan dari folder ./public
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# GANTI: isi "id" dengan ID dari: npx wrangler kv namespace create COUPLE_KV
+[[kv_namespaces]]
+binding = "COUPLE_KV"
+id = "2eb5d7bdd6b24daca0ebb952be8c895c"
+
+# OPSIONAL: domain sendiri. Hapus tanda # dan ganti domainnya.
+# routes = [ { pattern = "love.domainkamu.com", custom_domain = true } ]
+
+[vars]
+# GANTI: origin yang diizinkan CORS. "*" = semua (aman karena pakai token, bukan cookie).
+ALLOWED_ORIGIN = "*"

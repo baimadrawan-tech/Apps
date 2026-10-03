@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- GANTI NAMA APLIKASI: <title>, meta description, APP_NAME di script, dan "name"/"short_name" di manifest.json -->
+<title>Dua Hati — Ruang Privat Berdua</title>
+<meta name="description" content="Ruang privat untuk pasangan: mood harian, berbagi lokasi, hari spesial, kenangan, dan peliharaan virtual yang dirawat berdua.">
+<!-- theme-color = Rich Mahogany (palet), meta tidak bisa membaca variabel CSS -->
+<meta name="theme-color" content="#250209">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+/* ===== PALET WARNA (hanya 5 warna ini, ubah di sini saja) ===== */
+:root{
+  --snow:#FFF3F2;
+  --petal:#FFCAE4;
+  --rose:#F10291;
+  --raspberry:#89235B;
+  --mahogany:#250209;
+
+  --bw:3px;                 /* tebal border */
+  --sh:6px;                 /* offset hard shadow */
+  --r:4px;                  /* radius kecil */
+  --font-head:"Anton","Bebas Neue",Impact,"Arial Narrow",sans-serif;
+  --font-body:"Space Grotesk","Roboto",system-ui,sans-serif;
+  --nav-h:76px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font-body);color:var(--mahogany);background-color:var(--snow);
+  background-image:radial-gradient(color-mix(in srgb,var(--mahogany) 14%,transparent) 1.2px,transparent 1.2px);
+  background-size:18px 18px;font-size:16px;line-height:1.45;overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,.head{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.02em;font-weight:400;line-height:1.05}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:4px solid var(--mahogany);outline-offset:3px}
+.dark :focus-visible,.dark:focus-visible,nav :focus-visible,header :focus-visible{outline-color:var(--snow)}
+[hidden]{display:none!important}
+
+/* ===== Dekorasi sparkle latar ===== */
+.deco{position:fixed;pointer-events:none;z-index:0}
+.deco path{fill:var(--petal);stroke:var(--mahogany);stroke-width:3}
+.deco.d1{width:260px;top:-70px;right:-90px}
+.deco.d2{width:200px;bottom:40px;left:-80px}
+.deco.d2 path{fill:var(--rose)}
+
+/* ===== Layout ===== */
+.app{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100%;padding:16px 16px calc(var(--nav-h) + 28px)}
+header.top{display:flex;gap:10px;align-items:stretch;margin-top:max(4px,env(safe-area-inset-top))}
+.title-box{flex:1;background:var(--mahogany);color:var(--snow);border:var(--bw) solid var(--mahogany);box-shadow:var(--sh) var(--sh) 0 var(--rose);border-radius:var(--r);padding:10px 14px}
+.title-box small{font-family:var(--font-body);font-weight:700;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--petal)}
+.title-box h1{font-size:1.9rem}
+.icon-btn{width:56px;min-height:56px;display:grid;place-items:center;background:var(--rose);color:var(--mahogany);border:var(--bw) solid var(--mahogany);border-radius:var(--r);box-shadow:4px 4px 0 var(--mahogany);cursor:pointer;font-size:1.4rem;transition:transform .12s,box-shadow .12s}
+.icon-btn:active{transform:translate(4px,4px);box-shadow:none}
+
+.marquee{margin:18px -16px 16px;background:var(--raspberry);color:var(--snow);border-block:var(--bw) solid var(--mahogany);overflow:hidden;white-space:nowrap}
+.marquee span{display:inline-block;padding:8px 0;font-family:var(--font-head);font-size:1.15rem;letter-spacing:.06em;animation:mq 18s linear infinite}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+.banner{display:flex;gap:10px;align-items:center;background:var(--mahogany);color:var(--snow);border:var(--bw) solid var(--mahogany);box-shadow:4px 4px 0 var(--rose);border-radius:var(--r);padding:10px 12px;margin-bottom:16px;font-weight:700}
+.banner .ic{color:var(--rose);font-size:1.4rem}
+
+/* ===== Kartu ===== */
+.card{position:relative;background:var(--petal);color:var(--mahogany);border:var(--bw) solid var(--mahogany);border-radius:var(--r);box-shadow:var(--sh) var(--sh) 0 var(--mahogany);padding:16px;margin-bottom:18px;transition:transform .12s,box-shadow .12s,background-color .12s,color .12s}
+.card.dark{background:var(--raspberry);color:var(--snow)}
+.card.hov:active{transform:translate(var(--sh),var(--sh));box-shadow:0 0 0 var(--mahogany)}
+@media (hover:hover){
+  .card.hov:hover{transform:translate(-3px,-3px);box-shadow:calc(var(--sh) + 3px) calc(var(--sh) + 3px) 0 var(--mahogany);background:var(--rose);color:var(--mahogany)}
+  .card.hov:hover .muted{color:var(--mahogany)}
+  .card.hov:active{transform:translate(var(--sh),var(--sh));box-shadow:0 0 0 var(--mahogany)}
+}
+.card h2{font-size:1.5rem;margin-bottom:10px}
+.row{display:flex;gap:12px;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid2 .card{margin-bottom:0}
+.badge{flex:none;min-width:52px;height:52px;padding:0 8px;display:grid;place-items:center;background:var(--mahogany);color:var(--snow);border:var(--bw) solid var(--mahogany);border-radius:var(--r);font-family:var(--font-head);font-size:1.3rem}
+.badge svg{width:28px;height:28px}
+.badge svg path{fill:var(--rose)}
+.big{font-family:var(--font-head);font-size:3.4rem;line-height:1}
+.mid{font-family:var(--font-head);font-size:2rem;line-height:1}
+.muted{font-size:.9rem;font-weight:500}
+.label{font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase}
+
+/* stagger masuk */
+.enter{animation:pop .42s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--i,0) * 80ms)}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.97)}}
+
+/* ===== Tombol & form ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 18px;background:var(--rose);color:var(--mahogany);border:var(--bw) solid var(--mahogany);border-radius:var(--r);box-shadow:5px 5px 0 var(--mahogany);font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.btn:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--mahogany)}
+@media (hover:hover){.btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--mahogany)}.btn:active{transform:translate(5px,5px);box-shadow:none}}
+.btn.alt{background:var(--snow)}
+.btn.ink{background:var(--mahogany);color:var(--snow)}
+.dark .btn.alt{background:var(--snow);color:var(--mahogany)}
+.btn.block{width:100%}
+.btn.sm{min-height:48px;padding:6px 12px;font-size:.85rem}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.miss{width:100%;min-height:110px;font-family:var(--font-head);font-size:2.6rem;letter-spacing:.04em;box-shadow:var(--sh) var(--sh) 0 var(--mahogany)}
+.miss:active{transform:translate(var(--sh),var(--sh))}
+label.f{display:block;font-weight:700;font-size:.85rem;margin:10px 0 6px;text-transform:uppercase;letter-spacing:.06em}
+.input{width:100%;min-height:52px;padding:10px 12px;background:var(--snow);color:var(--mahogany);border:var(--bw) solid var(--mahogany);border-radius:var(--r);outline:none}
+textarea.input{min-height:90px;resize:vertical}
+.input:focus,.input:focus-visible{border-color:var(--rose);outline:3px solid var(--rose);outline-offset:0}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btns .btn{flex:1}
+
+/* ===== Mood ===== */
+.moods{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+.mood{min-height:52px;font-size:1.6rem;background:var(--snow);border:var(--bw) solid var(--mahogany);border-radius:var(--r);cursor:pointer;box-shadow:3px 3px 0 var(--mahogany);transition:transform .1s,box-shadow .1s}
+.mood:active{transform:translate(3px,3px);box-shadow:none}
+.mood[aria-pressed="true"]{background:var(--rose);box-shadow:none;transform:translate(3px,3px)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.who{background:var(--snow);border:var(--bw) solid var(--mahogany);border-radius:var(--r);padding:10px;text-align:center}
+.who .e{font-size:2.4rem;line-height:1.1}
+.avatar{width:52px;height:52px;display:grid;place-items:center;border:var(--bw) solid var(--mahogany);border-radius:var(--r);background:var(--rose);color:var(--mahogany);font-family:var(--font-head);font-size:1.5rem}
+
+/* ===== Nav ===== */
+nav.bottom{position:fixed;z-index:20;left:0;right:0;bottom:0;background:var(--mahogany);border-top:var(--bw) solid var(--snow);padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom ul{list-style:none;display:grid;grid-template-columns:repeat(5,1fr);max-width:520px;margin:0 auto;height:var(--nav-h);padding:8px;gap:6px}
+nav.bottom button{width:100%;height:100%;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;color:var(--petal);border:var(--bw) solid transparent;border-radius:var(--r);cursor:pointer;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+nav.bottom svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+nav.bottom button[aria-current="page"]{background:var(--rose);color:var(--mahogany);border-color:var(--snow)}
+
+/* ===== Peta ===== */
+#map{height:280px;border:var(--bw) solid var(--mahogany);border-radius:var(--r);background:var(--snow);margin-top:12px}
+.leaflet-container{font-family:var(--font-body)}
+.pin{width:30px!important;height:30px!important;margin:-15px 0 0 -15px!important;display:grid;place-items:center;background:var(--rose);color:var(--mahogany);border:3px solid var(--mahogany);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:3px 3px 0 var(--mahogany)}
+.pin b{transform:rotate(45deg);font-size:.8rem;font-family:var(--font-head)}
+.pin.me{background:var(--petal)}
+.fallback{margin-top:12px;background:var(--snow);color:var(--mahogany);border:var(--bw) dashed var(--mahogany);border-radius:var(--r);padding:12px;font-size:.9rem}
+.stat{background:var(--mahogany);color:var(--snow);border:var(--bw) solid var(--mahogany);border-radius:var(--r);padding:10px}
+.stat .mid{color:var(--petal)}
+
+/* ===== Daftar ===== */
+.list{display:flex;flex-direction:column;gap:14px}
+.item{display:flex;gap:12px;align-items:flex-start}
+.item .body{flex:1;min-width:0}
+.item h3{font-size:1.3rem;word-break:break-word}
+.tl{position:relative;padding-left:22px}
+.tl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:var(--bw);background:var(--mahogany)}
+.tl .card::before{content:"";position:absolute;left:-26px;top:20px;width:14px;height:14px;background:var(--rose);border:var(--bw) solid var(--mahogany)}
+.photo{display:block;width:100%;max-height:320px;object-fit:cover;border:var(--bw) solid var(--mahogany);border-radius:var(--r);margin-top:10px;background:var(--snow)}
+.empty{text-align:center;padding:22px 10px;font-weight:700}
+
+/* ===== Pet ===== */
+.pet-stage{background:var(--snow);border:var(--bw) solid var(--mahogany);border-radius:var(--r);display:grid;place-items:center;padding:10px;margin:8px 0 14px}
+.pet-svg{width:200px;height:200px}
+.pet-svg .body{fill:var(--rose);stroke:var(--mahogany);stroke-width:6}
+.pet-svg .ear{fill:var(--raspberry);stroke:var(--mahogany);stroke-width:6}
+.pet-svg .belly{fill:var(--petal);stroke:var(--mahogany);stroke-width:4}
+.pet-svg .ink{fill:var(--mahogany)}
+.pet-svg .line{fill:none;stroke:var(--mahogany);stroke-width:6;stroke-linecap:round}
+.pet-svg .shine{fill:var(--snow)}
+.pet-svg .zz{fill:var(--raspberry);font-family:var(--font-head);font-size:28px}
+.pet-svg .cheek{fill:var(--petal)}
+.bob{animation:bob 2.4s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes bob{50%{transform:translateY(-6px) scaleY(1.02)}}
+.bar{height:20px;background:var(--snow);border:var(--bw) solid var(--mahogany);border-radius:var(--r);overflow:hidden;margin:4px 0 10px}
+.bar i{display:block;height:100%;background:var(--rose);border-right:var(--bw) solid var(--mahogany);transition:width .4s}
+.log li{list-style:none;padding:6px 0;border-bottom:2px solid var(--mahogany);font-size:.9rem}
+.dark .log li{border-color:var(--snow)}
+
+/* ===== Toast, modal, efek ===== */
+#toast{position:fixed;z-index:60;left:50%;bottom:calc(var(--nav-h) + 20px);transform:translateX(-50%);width:min(92vw,460px);display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--snow);color:var(--mahogany);border:var(--bw) solid var(--mahogany);border-radius:var(--r);box-shadow:5px 5px 0 var(--mahogany);font-weight:700}
+#toast.err{background:var(--mahogany);color:var(--snow);box-shadow:5px 5px 0 var(--rose)}
+#toast .ic{font-size:1.3rem}
+dialog{margin:auto;width:min(92vw,460px);max-height:88vh;background:var(--petal);color:var(--mahogany);border:var(--bw) solid var(--mahogany);border-radius:var(--r);box-shadow:8px 8px 0 var(--mahogany);padding:18px}
+dialog::backdrop{background:color-mix(in srgb,var(--mahogany) 60%,transparent)}
+dialog h2{font-size:1.7rem;margin-bottom:8px}
+.code-box{font-family:var(--font-head);font-size:2.6rem;letter-spacing:.2em;text-align:center;background:var(--mahogany);color:var(--snow);border:var(--bw) solid var(--mahogany);border-radius:var(--r);padding:8px;box-shadow:5px 5px 0 var(--rose);margin:10px 0}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden}
+.fx{position:absolute;bottom:-60px;width:44px;height:44px;animation:rise 2.6s ease-out forwards}
+.fx path{stroke:var(--mahogany);stroke-width:2.5}
+.fx.c0 path{fill:var(--rose)}.fx.c1 path{fill:var(--petal)}.fx.c2 path{fill:var(--snow)}
+@keyframes rise{0%{transform:translate(0,0) scale(.5) rotate(0)}100%{transform:translate(var(--dx),-110vh) scale(1.3) rotate(var(--rot));opacity:0}}
+.flash{position:fixed;inset:0;z-index:69;display:grid;place-items:center;pointer-events:none}
+.flash div{background:var(--rose);color:var(--mahogany);border:var(--bw) solid var(--mahogany);box-shadow:8px 8px 0 var(--mahogany);padding:14px 22px;font-family:var(--font-head);font-size:2.2rem;text-transform:uppercase;animation:pop .4s both}
+
+/* ===== Welcome ===== */
+.welcome h1.hero{font-size:3.6rem;margin:30px 0 6px}
+.welcome .hero em{font-style:normal;background:var(--rose);color:var(--mahogany);padding:0 8px;border:var(--bw) solid var(--mahogany)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.tabs .btn[aria-pressed="false"]{background:var(--snow)}
+footer.tiny{text-align:center;font-size:.8rem;font-weight:500;margin-top:10px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .marquee span{animation:none}
+}
+</style>
+</head>
+<body>
+<!-- Dekorasi sparkle 4 sudut -->
+<svg class="deco d1" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 2C55 38 62 45 98 50C62 55 55 62 50 98C45 62 38 55 2 50C38 45 45 38 50 2Z"/></svg>
+<svg class="deco d2" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 2C55 38 62 45 98 50C62 55 55 62 50 98C45 62 38 55 2 50C38 45 45 38 50 2Z"/></svg>
+
+<!-- ============ WELCOME ============ -->
+<main id="welcome" class="app welcome" hidden>
+  <h1 class="hero">Ruang <em>berdua</em><br>cuma untuk kita</h1>
+  <p class="muted">Berbagi mood, lokasi, hari spesial, kenangan, dan merawat peliharaan virtual bareng pasangan.</p>
+  <section class="card enter" style="--i:1;margin-top:22px" aria-labelledby="wtitle">
+    <h2 id="wtitle">Mulai</h2>
+    <form id="wform" novalidate>
+      <label class="f" for="wname">Nama panggilan</label>
+      <input class="input" id="wname" maxlength="24" autocomplete="nickname" placeholder="mis. Sayang" required>
+      <div class="tabs" role="group" aria-label="Pilih cara mulai">
+        <button type="button" class="btn sm" id="tCreate" aria-pressed="true">Buat ruang baru</button>
+        <button type="button" class="btn sm" id="tJoin" aria-pressed="false">Gabung dengan kode</button>
+      </div>
+      <div id="joinWrap" hidden>
+        <label class="f" for="wcode">Kode pasangan (6 karakter)</label>
+        <input class="input" id="wcode" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="ABC123" style="text-transform:uppercase;letter-spacing:.2em;font-weight:700">
+      </div>
+      <button class="btn block" id="wsubmit" style="margin-top:16px" type="submit">Buat ruang</button>
+    </form>
+  </section>
+  <footer class="tiny">Tanpa akun. Identitas perangkat disimpan di browser ini.</footer>
+</main>
+
+<!-- ============ APP ============ -->
+<div id="app" class="app" hidden>
+  <header class="top">
+    <div class="title-box">
+      <small id="pairName">Kita</small>
+      <h1 id="pageTitle">Beranda</h1>
+    </div>
+    <button class="icon-btn" id="openSettings" aria-label="Buka pengaturan ruang">⚙</button>
+  </header>
+  <div class="marquee" aria-hidden="true"><span id="mq"></span></div>
+  <div id="batBanner" class="banner" role="status" hidden><span class="ic">⚡</span><span id="batText"></span></div>
+
+  <!-- BERANDA -->
+  <main id="tab-home" class="tab" aria-labelledby="pageTitle">
+    <section class="card hov enter" style="--i:0" aria-label="Hari bersama">
+      <div class="row">
+        <div class="badge" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M50 2C55 38 62 45 98 50C62 55 55 62 50 98C45 62 38 55 2 50C38 45 45 38 50 2Z"/></svg></div>
+        <div><div class="label">Bersama sejak</div><div class="muted" id="sinceText">Atur tanggal jadian</div></div>
+      </div>
+      <div class="big" style="margin-top:10px"><span id="daysCount">—</span> <span class="mid">hari</span></div>
+      <button class="btn sm alt" id="setStart" style="margin-top:10px">Atur tanggal jadian</button>
+    </section>
+    <div class="grid2" style="margin-bottom:18px">
+      <section class="card dark enter" style="--i:1" aria-label="Jarak">
+        <div class="label">Jarak</div><div class="mid" id="homeDist">—</div><div class="muted" id="homeDistSub">Lokasi belum dibagikan</div>
+      </section>
+      <section class="card dark enter" style="--i:2" aria-label="Baterai pasangan">
+        <div class="label">Baterai dia</div><div class="mid" id="homeBat">—</div><div class="muted" id="homeBatSub">Menunggu data</div>
+      </section>
+    </div>
+    <section class="card enter" style="--i:3" aria-labelledby="moodH">
+      <h2 id="moodH">Mood hari ini</h2>
+      <div class="duo">
+        <div class="who"><div class="label" id="meLbl">Aku</div><div class="e" id="myMood">❔</div></div>
+        <div class="who"><div class="label" id="ptLbl">Dia</div><div class="e" id="ptMood">❔</div><div class="muted" id="ptMoodAt"></div></div>
+      </div>
+      <div class="moods" id="moods" role="group" aria-label="Pilih mood kamu"></div>
+    </section>
+    <div class="enter" style="--i:4">
+      <button class="btn miss" id="missBtn" aria-label="Kirim Miss You ke pasangan">MISS YOU ♥</button>
+      <p class="muted" style="margin:12px 0 18px;text-align:center" id="missInfo"></p>
+    </div>
+  </main>
+
+  <!-- LOKASI -->
+  <main id="tab-loc" class="tab" hidden aria-labelledby="pageTitle">
+    <section class="card dark enter" style="--i:0" aria-labelledby="locH">
+      <div class="row" style="justify-content:space-between">
+        <h2 id="locH" style="margin:0">Lokasiku</h2>
+        <button class="btn sm alt" id="locToggle">Bagikan</button>
+      </div>
+      <p class="muted" id="locStatus" style="margin-top:8px">Lokasi tidak dibagikan.</p>
+      <p class="muted" style="margin-top:6px">ⓘ Lokasi hanya diperbarui saat halaman ini terbuka. Kamu bisa jeda kapan saja.</p>
+    </section>
+    <div class="grid2 enter" style="--i:1;margin-bottom:18px">
+      <div class="stat"><div class="label">Jarak</div><div class="mid" id="lDist">—</div></div>
+      <div class="stat"><div class="label">Bersama</div><div class="mid" id="lTogether">—</div></div>
+      <div class="stat"><div class="label">Kecepatanku</div><div class="mid" id="lMySpeed">—</div></div>
+      <div class="stat"><div class="label">Kecepatan dia</div><div class="mid" id="lPtSpeed">—</div></div>
+    </div>
+    <section class="card enter" style="--i:2" aria-labelledby="mapH">
+      <h2 id="mapH">Peta</h2>
+      <div id="map" role="img" aria-label="Peta posisi kamu dan pasangan"></div>
+      <div class="fallback" id="mapFallback" hidden></div>
+      <p class="muted" style="margin-top:8px">Peta © kontributor OpenStreetMap.</p>
+    </section>
+  </main>
+
+  <!-- HARI SPESIAL -->
+  <main id="tab-days" class="tab" hidden aria-labelledby="pageTitle">
+    <button class="btn block enter" style="--i:0;margin-bottom:18px" id="addEvent">+ Tambah hari spesial</button>
+    <div class="list" id="eventList"></div>
+  </main>
+
+  <!-- KENANGAN -->
+  <main id="tab-mem" class="tab" hidden aria-labelledby="pageTitle">
+    <button class="btn block enter" style="--i:0;margin-bottom:18px" id="addMem">+ Tulis kenangan</button>
+    <div class="tl" id="memList"></div>
+  </main>
+
+  <!-- PELIHARAAN -->
+  <main id="tab-pet" class="tab" hidden aria-labelledby="pageTitle">
+    <section class="card dark enter" style="--i:0" aria-labelledby="petName">
+      <div class="row" style="justify-content:space-between">
+        <h2 id="petName" style="margin:0">Mochi</h2>
+        <div class="badge" id="petLvl" aria-label="Level">LV1</div>
+      </div>
+      <div class="pet-stage" id="petStage"></div>
+      <div class="label">Kenyang</div><div class="bar" role="progressbar" aria-label="Kenyang" id="bHunger"><i></i></div>
+      <div class="label">Senang</div><div class="bar" role="progressbar" aria-label="Senang" id="bHappy"><i></i></div>
+      <div class="label">Energi</div><div class="bar" role="progressbar" aria-label="Energi" id="bEnergy"><i></i></div>
+      <div class="label">XP ke level berikutnya</div><div class="bar" role="progressbar" aria-label="XP" id="bXp"><i></i></div>
+      <div class="btns">
+        <button class="btn sm" data-pet="feed">🍙 Makan</button>
+        <button class="btn sm" data-pet="play">🎾 Main</button>
+        <button class="btn sm" data-pet="sleep" id="sleepBtn">🌙 Tidur</button>
+      </div>
+      <button class="btn sm alt block" style="margin-top:12px" id="renamePet">Ganti nama</button>
+    </section>
+    <section class="card enter" style="--i:1" aria-labelledby="logH">
+      <h2 id="logH">Riwayat perawatan</h2>
+      <ul class="log" id="petLog"></ul>
+    </section>
+  </main>
+</div>
+
+<nav class="bottom" id="nav" aria-label="Navigasi utama" hidden>
+  <ul>
+    <li><button data-tab="home" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/><path d="M10 20v-5h4v5"/></svg>Beranda</button></li>
+    <li><button data-tab="loc"><svg viewBox="0 0 24 24"><path d="M12 22s7-7 7-12a7 7 0 0 0-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>Lokasi</button></li>
+    <li><button data-tab="days"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Hari</button></li>
+    <li><button data-tab="mem"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5-5-9 8"/></svg>Kenangan</button></li>
+    <li><button data-tab="pet"><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="7"/><path d="M6 9L5 3l4 3M18 9l1-6-4 3"/></svg>Pet</button></li>
+  </ul>
+</nav>
+
+<!-- ============ DIALOGS ============ -->
+<dialog id="dlgCode" aria-labelledby="dcH">
+  <h2 id="dcH">Ruang dibuat!</h2>
+  <p>Bagikan kode ini ke pasanganmu supaya dia bisa bergabung.</p>
+  <div class="code-box" id="dcCode">------</div>
+  <div class="btns"><button class="btn" id="dcCopy">Salin kode</button><button class="btn alt" id="dcShare">Bagikan</button></div>
+  <button class="btn ink block" style="margin-top:12px" data-close>Lanjut</button>
+</dialog>
+
+<dialog id="dlgSettings" aria-labelledby="dsH">
+  <h2 id="dsH">Pengaturan</h2>
+  <div class="label">Kode ruang</div>
+  <div class="code-box" id="dsCode">------</div>
+  <button class="btn sm alt block" id="dsCopy">Salin kode</button>
+  <label class="f" for="dsName">Nama panggilanku</label>
+  <input class="input" id="dsName" maxlength="24">
+  <label class="f" for="dsStart">Tanggal jadian</label>
+  <input class="input" id="dsStart" type="date">
+  <button class="btn block" style="margin-top:14px" id="dsSave">Simpan</button>
+  <button class="btn alt block" style="margin-top:12px" id="installBtn" hidden>⬇ Install aplikasi</button>
+  <hr style="border:0;border-top:var(--bw) solid var(--mahogany);margin:16px 0">
+  <p class="muted">Keluar akan menghapus data lokal di perangkat ini dan mengeluarkanmu dari ruang.</p>
+  <button class="btn ink block" style="margin-top:10px" id="dsLeave">Keluar dari ruang</button>
+  <button class="btn alt block" style="margin-top:10px" data-close>Tutup</button>
+</dialog>
+
+<dialog id="dlgLoc" aria-labelledby="dlH">
+  <h2 id="dlH">Berbagi lokasi?</h2>
+  <p>Lokasimu hanya dikirim ke pasanganmu di ruang ini, dan hanya diperbarui selama halaman ini terbuka. Kamu bisa menjeda kapan saja. Browser akan meminta izin setelah ini.</p>
+  <div class="btns"><button class="btn" id="dlOk">Izinkan</button><button class="btn alt" data-close>Nanti</button></div>
+</dialog>
+
+<dialog id="dlgEvent" aria-labelledby="deH">
+  <h2 id="deH">Hari spesial</h2>
+  <form id="evForm" method="dialog" novalidate>
+    <label class="f" for="evTitle">Judul</label><input class="input" id="evTitle" maxlength="60" placeholder="Anniversary" required>
+    <label class="f" for="evDate">Tanggal</label><input class="input" id="evDate" type="date" required>
+    <label class="f" for="evEmoji">Emoji</label><input class="input" id="evEmoji" maxlength="4" placeholder="💗">
+    <label class="f" for="evRepeat">Pengingat</label>
+    <select class="input" id="evRepeat"><option value="yearly">Berulang tiap tahun</option><option value="monthly">Berulang tiap bulan</option><option value="none">Sekali saja</option></select>
+    <div class="btns"><button class="btn" type="submit" value="save">Simpan</button><button class="btn alt" type="button" data-close>Batal</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlgMem" aria-labelledby="dmH">
+  <h2 id="dmH">Kenangan baru</h2>
+  <form id="memForm" method="dialog" novalidate>
+    <label class="f" for="mText">Cerita singkat</label><textarea class="input" id="mText" maxlength="500" required></textarea>
+    <div class="grid2">
+      <div><label class="f" for="mEmoji">Emoji</label><input class="input" id="mEmoji" maxlength="4" placeholder="💗"></div>
+      <div><label class="f" for="mDate">Tanggal</label><input class="input" id="mDate" type="date"></div>
+    </div>
+    <label class="f" for="mPhoto">Foto (opsional)</label><input class="input" id="mPhoto" type="file" accept="image/*">
+    <img id="mPrev" class="photo" alt="Pratinjau foto" hidden>
+    <div class="btns"><button class="btn" type="submit" id="mSave">Simpan</button><button class="btn alt" type="button" data-close>Batal</button></div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite" hidden><span class="ic" id="toastIc"></span><span id="toastMsg"></span></div>
+<div id="fx" aria-hidden="true"></div>
+
+<script>
+/* ================== KONFIGURASI ================== */
+const APP_NAME = "Dua Hati";                // GANTI nama aplikasi di sini juga
+const API_BASE = "";                        // kosong = worker yang sama. Isi URL worker jika front-end di-host terpisah, mis. "https://dua-hati.akun.workers.dev"
+const POLL_MS = 7000;                       // interval sinkronisasi (5000-10000)
+const MARQUEE = "MISS YOU ♥ SELALU TERHUBUNG ♥ KITA BERDUA ♥ ";
+// Daftar mood (harus sama dengan MOODS di worker.js)
+const MOODS = [["😍","Kasmaran"],["😊","Senang"],["😌","Tenang"],["😐","Biasa"],["😴","Ngantuk"],["😢","Sedih"],["😡","Kesal"],["🥺","Kangen"],["🤒","Sakit"],["🥳","Semangat"]];
+const SPARK = "M50 2C55 38 62 45 98 50C62 55 55 62 50 98C45 62 38 55 2 50C38 45 45 38 50 2Z";
+const HEART = "M50 88C20 66 6 50 6 32a22 22 0 0 1 44-6 22 22 0 0 1 44 6c0 18-14 34-44 56Z";
+
+/* ================== UTIL ================== */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const DAY = 86400000;
+const today = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+const parseDate = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const fmtDate = s => parseDate(s).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" });
+const ago = t => { const s = (Date.now()-t)/1000; if (s<60) return "baru saja"; if (s<3600) return Math.floor(s/60)+" mnt lalu"; if (s<86400) return Math.floor(s/3600)+" jam lalu"; return Math.floor(s/86400)+" hari lalu"; };
+const fmtDist = m => m == null ? "—" : m < 1000 ? Math.round(m)+" m" : (m/1000).toFixed(m<10000?1:0)+" km";
+const fmtDur = ms => { const m = Math.floor(ms/60000); if (m<60) return m+" mnt"; const h = Math.floor(m/60); return h<24 ? h+"j "+(m%60)+"m" : Math.floor(h/24)+"h "+(h%24)+"j"; };
+function haversine(a,b){const R=6371000,t=x=>x*Math.PI/180,dLat=t(b.lat-a.lat),dLng=t(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+
+let toastT;
+function toast(msg, err=false){ const t=$("#toast"); t.className = err?"err":""; $("#toastIc").textContent = err?"✖":"✔"; $("#toastMsg").textContent = msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, 3200); }
+
+/* ================== SESSION & API ================== */
+const LS = "duahati.session";
+let session = JSON.parse(localStorage.getItem(LS) || "null");
+let S = null; // state ruang terbaru
+
+async function api(path, body){
+  const opt = { method: body ? "POST":"GET", headers: {"Content-Type":"application/json"} };
+  if (session) { opt.headers.Authorization = "Bearer "+session.token; opt.headers["X-Room"] = session.code; }
+  if (body) opt.body = JSON.stringify(body);
+  let res;
+  try { res = await fetch(API_BASE + path, opt); } catch { throw new Error("Tidak ada koneksi. Coba lagi nanti."); }
+  const data = await res.json().catch(()=>({error:"Respons server tidak valid"}));
+  if (!res.ok) { const e = new Error(data.error || "Terjadi kesalahan"); e.status = res.status; throw e; }
+  return data;
+}
+async function update(section, data){ const st = await api("/api/update", {section, data}); applyState(st); return st; }
+
+/* ================== WELCOME ================== */
+let joinMode = false;
+function setMode(j){ joinMode=j; $("#tCreate").setAttribute("aria-pressed", !j); $("#tJoin").setAttribute("aria-pressed", j); $("#joinWrap").hidden=!j; $("#wsubmit").textContent = j?"Gabung":"Buat ruang"; }
+$("#tCreate").onclick = ()=>setMode(false);
+$("#tJoin").onclick = ()=>{ setMode(true); $("#wcode").focus(); };
+$("#wform").onsubmit = async e => {
+  e.preventDefault();
+  const name = $("#wname").value.trim(), code = $("#wcode").value.trim().toUpperCase();
+  if (!name) { toast("Isi nama panggilan dulu ya", true); $("#wname").focus(); return; }
+  if (joinMode && !/^[A-Z0-9]{6}$/.test(code)) { toast("Kode harus 6 karakter huruf/angka", true); $("#wcode").focus(); return; }
+  const btn = $("#wsubmit"); btn.disabled = true;
+  try {
+    const r = await api(joinMode ? "/api/join":"/api/create", joinMode ? {name, code} : {name});
+    session = { code:r.code, token:r.token, memberId:r.memberId, name };
+    localStorage.setItem(LS, JSON.stringify(session));
+    await startApp();
+    if (!joinMode) { $("#dcCode").textContent = r.code; $("#dlgCode").showModal(); }
+    else toast("Berhasil bergabung! ♥");
+  } catch(err){ toast(err.message, true); }
+  finally { btn.disabled = false; }
+};
+const copyCode = async () => { try { await navigator.clipboard.writeText(session.code); toast("Kode disalin"); } catch { toast("Gagal menyalin, salin manual: "+session.code, true); } };
+$("#dcCopy").onclick = copyCode; $("#dsCopy").onclick = copyCode;
+$("#dcShare").onclick = async () => {
+  const text = `Gabung ke ruang kita di ${APP_NAME}! Kodenya: ${session.code}`;
+  if (navigator.share) { try { await navigator.share({ title: APP_NAME, text, url: location.origin }); } catch {} } else copyCode();
+};
+$$("[data-close]").forEach(b => b.onclick = () => b.closest("dialog").close());
+
+/* ================== NAV ================== */
+const TITLES = { home:"Beranda", loc:"Lokasi", days:"Hari Spesial", mem:"Kenangan", pet:"Peliharaan" };
+let curTab = "home";
+function showTab(t){
+  curTab = t;
+  $$(".tab").forEach(s => s.hidden = s.id !== "tab-"+t);
+  $$("nav.bottom button").forEach(b => b.dataset.tab===t ? b.setAttribute("aria-current","page") : b.removeAttribute("aria-current"));
+  $("#pageTitle").textContent = TITLES[t];
+  // ulangi animasi stagger
+  $$("#tab-"+t+" .enter").forEach(el => { el.style.animation="none"; el.offsetHeight; el.style.animation=""; });
+  if (t === "loc") initMap();
+  window.scrollTo({top:0, behavior: reduced?"auto":"smooth"});
+}
+$$("nav.bottom button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+/* ================== RENDER ================== */
+const me = () => S?.members[S.me];
+const partner = () => S ? Object.entries(S.members).find(([id]) => id !== S.me)?.[1] : null;
+
+function applyState(st){ S = st; render(); checkMissYou(); }
+
+function render(){
+  if (!S) return;
+  const m = me(), p = partner();
+  $("#pairName").textContent = p ? `${m.name} ♥ ${p.name}` : `${m.name} · menunggu pasangan`;
+  $("#meLbl").textContent = m.name; $("#ptLbl").textContent = p ? p.name : "Dia";
+
+  // hari bersama
+  if (S.startDate) {
+    const n = Math.floor((today() - parseDate(S.startDate)) / DAY) + 1;
+    $("#daysCount").textContent = Math.max(0, n).toLocaleString("id-ID");
+    $("#sinceText").textContent = fmtDate(S.startDate);
+    $("#setStart").hidden = true;
+  } else { $("#daysCount").textContent = "—"; $("#sinceText").textContent = "Belum diatur"; $("#setStart").hidden = false; }
+
+  // mood
+  $("#myMood").textContent = m.mood || "❔";
+  $("#ptMood").textContent = p?.mood || "❔";
+  $("#ptMoodAt").textContent = p ? (p.mood ? ago(p.moodAt) : "belum memilih") : "belum bergabung";
+  $$("#moods .mood").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === m.mood));
+
+  // baterai pasangan
+  const b = p?.battery;
+  let banner = false;
+  if (!p) { $("#homeBat").textContent = "—"; $("#homeBatSub").textContent = "Pasangan belum bergabung"; }
+  else if (!b) { $("#homeBat").textContent = "—"; $("#homeBatSub").textContent = "Belum ada data"; }
+  else if (!b.available) { $("#homeBat").textContent = "N/A"; $("#homeBatSub").textContent = "Tidak tersedia di perangkatnya"; }
+  else {
+    const pct = Math.round(b.level*100);
+    $("#homeBat").textContent = pct+"%"; $("#homeBatSub").textContent = (b.charging?"Sedang mengisi · ":"")+ago(b.at);
+    if (pct < 20 && !b.charging) { banner = true; $("#batText").textContent = `Baterai ${p.name} tinggal ${pct}%. Mungkin dia akan sulit dihubungi.`; }
+  }
+  $("#batBanner").hidden = !banner;
+
+  // jarak
+  const d = (m.loc && p?.loc) ? haversine(m.loc, p.loc) : null;
+  $("#homeDist").textContent = fmtDist(d); $("#lDist").textContent = fmtDist(d);
+  $("#homeDistSub").textContent = d!=null ? (d<150?"Kalian bersama 💞":"Terpisah sementara") : !m.sharing ? "Lokasimu dijeda" : !p ? "Menunggu pasangan" : "Lokasi dia tidak dibagikan";
+  $("#lTogether").textContent = S.togetherSince ? fmtDur(S.serverTime - S.togetherSince) : "—";
+  $("#lMySpeed").textContent = mySpeed != null ? (mySpeed*3.6).toFixed(1)+" km/j" : "—";
+  $("#lPtSpeed").textContent = p?.loc?.speed != null ? (p.loc.speed*3.6).toFixed(1)+" km/j" : "—";
+  $("#locToggle").textContent = watchId!=null ? "Jeda" : "Bagikan";
+  $("#locToggle").setAttribute("aria-pressed", watchId!=null);
+  $("#locStatus").textContent = watchId!=null ? (m.loc ? `Dibagikan · akurasi ±${Math.round(m.loc.acc||0)} m · ${ago(m.loc.at)}` : "Mencari lokasi…") : "Lokasi tidak dibagikan.";
+  updateMap();
+
+  // miss you
+  const last = (S.missYou||[]).find(x => x.from !== S.me);
+  $("#missInfo").textContent = last ? `${p?.name || "Dia"} terakhir kangen ${ago(last.at)}` : "Tap untuk kirim rasa kangen ke layar dia";
+
+  renderEvents(); renderMemories(); renderPet();
+}
+
+/* ----- mood buttons ----- */
+$("#moods").innerHTML = MOODS.map(([e,l]) => `<button class="mood" data-m="${e}" aria-label="Mood ${l}" title="${l}">${e}</button>`).join("");
+$("#moods").onclick = async e => { const b = e.target.closest(".mood"); if (!b) return; try { await update("mood", {mood:b.dataset.m}); toast("Mood diperbarui"); } catch(err){ toast(err.message,true); } };
+
+/* ----- miss you ----- */
+const fxSvg = (cls, d) => `<svg class="fx ${cls}" viewBox="0 0 100 100"><path d="${d}"/></svg>`;
+function burst(text){
+  if (reduced) { toast(text); return; }
+  const fx = $("#fx"); let html = "";
+  for (let i=0;i<26;i++){
+    const x = Math.random()*100, dx = (Math.random()*160-80)+"px", rot = (Math.random()*540-270)+"deg", del = Math.random()*0.8, s = 28+Math.random()*34;
+    html += fxSvg("c"+(i%3), i%2?HEART:SPARK).replace('class="fx', `style="left:${x}%;--dx:${dx};--rot:${rot};animation-delay:${del}s;width:${s}px;height:${s}px" class="fx`);
+  }
+  fx.innerHTML = html + `<div class="flash"><div>${esc(text)}</div></div>`;
+  if (navigator.vibrate) navigator.vibrate([60,40,60]);
+  setTimeout(()=>fx.innerHTML="", 3600);
+}
+$("#missBtn").onclick = async () => {
+  if (!partner()) { toast("Pasanganmu belum bergabung. Bagikan kodenya dulu!", true); return; }
+  try { await update("missyou", {}); burst("Terkirim ♥"); } catch(err){ toast(err.message,true); }
+};
+function checkMissYou(){
+  const seenKey = "duahati.seenMiss";
+  const last = (S.missYou||[]).find(x => x.from !== S.me);
+  if (!last) return;
+  const seen = localStorage.getItem(seenKey);
+  if (seen === null) { localStorage.setItem(seenKey, last.id); return; } // pertama kali: jangan putar riwayat lama
+  if (seen !== last.id) { localStorage.setItem(seenKey, last.id); burst(`${partner()?.name || "Dia"} kangen kamu!`); }
+}
+
+/* ----- hari spesial ----- */
+function nextOccur(ev){
+  const t = today(), base = parseDate(ev.date);
+  if (ev.repeat === "none") return base;
+  let d = new Date(base);
+  if (ev.repeat === "yearly") { d.setFullYear(t.getFullYear()); if (d < t) d.setFullYear(t.getFullYear()+1); }
+  else { d = new Date(t.getFullYear(), t.getMonth(), Math.min(base.getDate(), 28)); if (base.getDate()>28) { const last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate(); d.setDate(Math.min(base.getDate(),last)); } if (d < t) { d = new Date(t.getFullYear(), t.getMonth()+1, 1); const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(base.getDate(),last)); } }
+  return d;
+}
+function renderEvents(){
+  const list = (S.events||[]).map(e => ({...e, next: nextOccur(e)})).map(e => ({...e, days: Math.round((e.next - today())/DAY)}))
+    .sort((a,b) => (a.days<0)-(b.days<0) || Math.abs(a.days)-Math.abs(b.days));
+  const R = { yearly:"Tiap tahun", monthly:"Tiap bulan", none:"Sekali" };
+  $("#eventList").innerHTML = list.length ? list.map((e,i) => `
+    <article class="card hov item enter" style="--i:${i+1};margin:0">
+      <div class="badge" aria-hidden="true">${esc(e.emoji)}</div>
+      <div class="body">
+        <h3>${esc(e.title)}</h3>
+        <div class="muted">${e.next.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"})} · ${R[e.repeat]}</div>
+        <div class="mid" style="margin-top:6px">${e.days===0?"Hari ini! 🎉":e.days>0?e.days+" hari lagi":"Lewat "+(-e.days)+" hari"}</div>
+        <div class="btns"><button class="btn sm alt" data-edit="${e.id}">Ubah</button><button class="btn sm ink" data-del="${e.id}">Hapus</button></div>
+      </div>
+    </article>`).join("") : `<div class="card empty">Belum ada hari spesial. Tambahkan anniversary atau ulang tahun!</div>`;
+  remindEvents(list);
+}
+let editingEv = null;
+function openEvent(ev){
+  editingEv = ev?.id || null;
+  $("#deH").textContent = ev ? "Ubah hari spesial" : "Hari spesial baru";
+  $("#evTitle").value = ev?.title || ""; $("#evDate").value = ev?.date || ""; $("#evEmoji").value = ev?.emoji || ""; $("#evRepeat").value = ev?.repeat || "yearly";
+  $("#dlgEvent").showModal();
+}
+$("#addEvent").onclick = () => openEvent(null);
+$("#eventList").onclick = async e => {
+  const ed = e.target.closest("[data-edit]"), del = e.target.closest("[data-del]");
+  if (ed) openEvent(S.events.find(x => x.id === ed.dataset.edit));
+  if (del && confirm("Hapus hari spesial ini?")) { try { await update("event", {action:"delete", id: del.dataset.del}); toast("Dihapus"); } catch(err){ toast(err.message,true); } }
+};
+$("#evForm").onsubmit = async e => {
+  e.preventDefault();
+  const data = { id: editingEv, title: $("#evTitle").value, date: $("#evDate").value, emoji: $("#evEmoji").value, repeat: $("#evRepeat").value };
+  if (!data.title.trim() || !data.date) { toast("Judul dan tanggal wajib diisi", true); return; }
+  try { await update("event", data); $("#dlgEvent").close(); toast("Tersimpan"); } catch(err){ toast(err.message,true); }
+};
+// Pengingat: tampil sekali per hari untuk acara hari ini/besok (selama halaman terbuka)
+function remindEvents(list){
+  const key = "duahati.remind." + new Date().toDateString();
+  if (localStorage.getItem(key)) return;
+  const soon = list.filter(e => e.days === 0 || e.days === 1);
+  if (!soon.length) return;
+  localStorage.setItem(key, "1");
+  const msg = soon.map(e => `${e.emoji} ${e.title} ${e.days===0?"hari ini":"besok"}`).join(" · ");
+  toast("Pengingat: " + msg);
+  if ("Notification" in window && Notification.permission === "granted") new Notification(APP_NAME, { body: msg, icon: "/icon.svg" });
+}
+
+/* ----- kenangan ----- */
+function renderMemories(){
+  const list = S.memories || [];
+  $("#memList").innerHTML = list.length ? list.map((m,i) => `
+    <article class="card hov enter" style="--i:${Math.min(i,8)+1}">
+      <div class="row"><div class="badge" aria-hidden="true">${esc(m.emoji)}</div>
+        <div><div class="label">${fmtDate(m.date)}</div><div class="muted">oleh ${esc(S.members[m.by]?.name || "mantan anggota")}</div></div></div>
+      <p style="margin-top:10px;white-space:pre-wrap;word-break:break-word">${esc(m.text)}</p>
+      ${m.photo ? `<img class="photo" src="${esc(m.photo)}" alt="Foto kenangan: ${esc(m.text.slice(0,60))}" loading="lazy">` : ""}
+      ${m.by === S.me ? `<div class="btns"><button class="btn sm ink" data-mdel="${m.id}">Hapus</button></div>` : ""}
+    </article>`).join("") : `<div class="card empty">Belum ada kenangan. Tulis momen kecil hari ini!</div>`;
+}
+let memPhoto = null;
+$("#addMem").onclick = () => { $("#memForm").reset(); memPhoto=null; $("#mPrev").hidden=true; $("#mDate").value = new Date().toLocaleDateString("sv-SE"); $("#dlgMem").showModal(); };
+$("#memList").onclick = async e => { const b = e.target.closest("[data-mdel]"); if (b && confirm("Hapus kenangan ini?")) { try { await update("memory",{action:"delete", id:b.dataset.mdel}); toast("Dihapus"); } catch(err){ toast(err.message,true); } } };
+// Kompres foto di klien: max 720px, turunkan kualitas sampai < ~150KB
+async function compress(file){
+  const url = URL.createObjectURL(file);
+  const img = await new Promise((ok,no) => { const i = new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=url; });
+  URL.revokeObjectURL(url);
+  let max = 720, out;
+  for (let tries=0; tries<6; tries++){
+    const s = Math.min(1, max/Math.max(img.width,img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    for (const q of [0.72,0.6,0.5,0.4]) { out = c.toDataURL("image/jpeg", q); if (out.length < 150000) return out; }
+    max = Math.round(max*0.75);
+  }
+  return out.length < 158000 ? out : null;
+}
+$("#mPhoto").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { memPhoto = await compress(f); if (!memPhoto) throw 0; $("#mPrev").src = memPhoto; $("#mPrev").hidden = false; }
+  catch { memPhoto = null; toast("Foto tidak bisa diproses", true); }
+};
+$("#memForm").onsubmit = async e => {
+  e.preventDefault();
+  const text = $("#mText").value.trim(); if (!text) { toast("Tulis sesuatu dulu", true); return; }
+  $("#mSave").disabled = true;
+  try { await update("memory", { text, emoji: $("#mEmoji").value, date: $("#mDate").value, photo: memPhoto }); $("#dlgMem").close(); toast("Kenangan tersimpan ♥"); showTab("mem"); }
+  catch(err){ toast(err.message,true); } finally { $("#mSave").disabled = false; }
+};
+
+/* ----- peliharaan (SVG) ----- */
+function petSvg(p){
+  const mood = p.sleeping ? "sleep" : (p.hunger < 25 || p.happy < 25) ? "sad" : (p.happy > 70 && p.hunger > 50) ? "happy" : "ok";
+  const eyes = mood==="sleep" ? `<path class="line" d="M70 98q10 8 20 0M110 98q10 8 20 0"/>`
+    : `<circle class="ink" cx="80" cy="98" r="9"/><circle class="ink" cx="120" cy="98" r="9"/><circle class="shine" cx="83" cy="95" r="3"/><circle class="shine" cx="123" cy="95" r="3"/>`;
+  const mouth = { happy:`<path class="line" d="M86 120q14 16 28 0"/>`, ok:`<path class="line" d="M90 122h20"/>`, sad:`<path class="line" d="M86 128q14 -12 28 0"/>`, sleep:`<circle class="ink" cx="100" cy="124" r="5"/>` }[mood];
+  const scale = Math.min(1.15, 0.85 + p.level*0.03);
+  return `<svg class="pet-svg" viewBox="0 0 200 200" role="img" aria-label="${esc(p.name)}, ${({happy:"senang",ok:"baik-baik saja",sad:"butuh perhatian",sleep:"sedang tidur"})[mood]}">
+    <g class="${reduced?"":"bob"}" transform="translate(100 110) scale(${scale}) translate(-100 -110)">
+      <path class="ear" d="M52 70 L46 22 L86 52Z"/><path class="ear" d="M148 70 L154 22 L114 52Z"/>
+      <ellipse class="body" cx="100" cy="110" rx="70" ry="64"/>
+      <ellipse class="belly" cx="100" cy="140" rx="34" ry="22"/>
+      <circle class="cheek" cx="62" cy="116" r="9"/><circle class="cheek" cx="138" cy="116" r="9"/>
+      ${eyes}${mouth}
+    </g>
+    ${mood==="sleep" ? `<text class="zz" x="150" y="40">Z</text><text class="zz" x="170" y="22" style="font-size:20px">z</text>` : ""}
+    ${mood==="happy" ? `<path class="ear" transform="translate(150 20) scale(.32)" d="${SPARK}"/>` : ""}
+  </svg>`;
+}
+function setBar(id, v, max=100){ const pct = Math.round(Math.max(0,Math.min(100, v/max*100))); const el=$(id); el.querySelector("i").style.width = pct+"%"; el.setAttribute("aria-valuenow", pct); el.setAttribute("aria-valuemin",0); el.setAttribute("aria-valuemax",100); }
+function renderPet(){
+  const p = S.pet;
+  $("#petName").textContent = p.name; $("#petLvl").textContent = "LV"+p.level;
+  $("#petStage").innerHTML = petSvg(p);
+  setBar("#bHunger", p.hunger); setBar("#bHappy", p.happy); setBar("#bEnergy", p.energy); setBar("#bXp", p.xp, p.level*60);
+  $("#sleepBtn").textContent = p.sleeping ? "☀ Bangun" : "🌙 Tidur";
+  $$("[data-pet='feed'],[data-pet='play']").forEach(b => b.disabled = p.sleeping);
+  $("#petLog").innerHTML = p.log.length ? p.log.map(l => `<li><b>${esc(l.who)}</b> ${esc(l.text)} · ${ago(l.at)}</li>`).join("") : `<li>Belum ada aktivitas. Ayo rawat ${esc(p.name)}!</li>`;
+}
+$$("[data-pet]").forEach(b => b.onclick = async () => { try { const lv = S.pet.level; await update("pet", {action:b.dataset.pet}); if (S.pet.level > lv) burst(`${S.pet.name} naik ke LV${S.pet.level}!`); } catch(err){ toast(err.message,true); } });
+$("#renamePet").onclick = async () => { const n = prompt("Nama baru peliharaan:", S.pet.name); if (n && n.trim()) { try { await update("pet",{action:"rename", name:n}); } catch(err){ toast(err.message,true); } } };
+
+/* ================== LOKASI ================== */
+let watchId = null, lastSent = 0, lastPos = null, mySpeed = null;
+function startWatch(){
+  if (!("geolocation" in navigator)) { toast("Perangkat ini tidak mendukung lokasi", true); return; }
+  watchId = navigator.geolocation.watchPosition(onPos, err => {
+    toast(err.code===1 ? "Izin lokasi ditolak. Aktifkan di pengaturan browser." : "Lokasi tidak bisa didapat", true);
+    stopWatch(false);
+  }, { enableHighAccuracy:true, maximumAge:10000, timeout:30000 });
+  localStorage.setItem("duahati.share","1"); render();
+}
+async function stopWatch(send=true){
+  if (watchId != null) navigator.geolocation.clearWatch(watchId);
+  watchId = null; mySpeed = null; localStorage.removeItem("duahati.share");
+  if (send) { try { await update("location", {sharing:false}); toast("Berbagi lokasi dijeda"); } catch(err){ toast(err.message,true); } }
+  render();
+}
+async function onPos(pos){
+  const c = pos.coords, t = pos.timestamp;
+  // kecepatan: pakai dari GPS, atau hitung dari 2 posisi terakhir
+  if (c.speed != null && !isNaN(c.speed)) mySpeed = c.speed;
+  else if (lastPos && t > lastPos.t) mySpeed = haversine(lastPos, {lat:c.latitude,lng:c.longitude}) / ((t-lastPos.t)/1000);
+  lastPos = { lat:c.latitude, lng:c.longitude, t };
+  if (Date.now() - lastSent < 15000 || document.hidden) { render(); return; } // throttle kirim tiap 15 dtk
+  lastSent = Date.now();
+  try { await update("location", { lat:c.latitude, lng:c.longitude, acc:c.accuracy, speed: mySpeed!=null && isFinite(mySpeed) ? Math.min(mySpeed,400) : null }); } catch {}
+}
+$("#locToggle").onclick = () => watchId!=null ? stopWatch() : (localStorage.getItem("duahati.locOk") ? startWatch() : $("#dlgLoc").showModal());
+$("#dlOk").onclick = () => { localStorage.setItem("duahati.locOk","1"); $("#dlgLoc").close(); startWatch(); };
+
+/* ----- peta (Leaflet + OSM, dimuat dinamis, dengan fallback) ----- */
+let map = null, mapFailed = false, mkMe = null, mkPt = null, line = null, mapLoading = null;
+function loadLeaflet(){
+  if (window.L) return Promise.resolve();
+  if (mapLoading) return mapLoading;
+  mapLoading = new Promise((ok, no) => {
+    const css = document.createElement("link"); css.rel="stylesheet"; css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(css);
+    const s = document.createElement("script"); s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; s.onload=ok; s.onerror=no; document.head.appendChild(s);
+    setTimeout(()=>no(new Error("timeout")), 12000);
+  });
+  return mapLoading;
+}
+async function initMap(){
+  if (map || mapFailed) { map && setTimeout(()=>map.invalidateSize(),50); updateMap(); return; }
+  try {
+    await loadLeaflet();
+    map = L.map("map", { zoomControl:true, attributionControl:true }).setView([-2.5,118], 4);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:19, attribution:"© OpenStreetMap" }).addTo(map);
+    updateMap(true);
+  } catch { mapFailed = true; $("#map").hidden = true; updateMap(); }
+}
+const pinIcon = (txt, cls) => L.divIcon({ className:"", html:`<div class="pin ${cls}"><b>${esc(txt)}</b></div>`, iconSize:[30,30] });
+function updateMap(fit=false){
+  if (!S) return;
+  const m = me(), p = partner();
+  const fb = $("#mapFallback");
+  if (mapFailed || !map) {
+    if (mapFailed) {
+      fb.hidden = false;
+      fb.innerHTML = `<b>Peta gagal dimuat.</b><br>Aku: ${m.loc ? m.loc.lat.toFixed(5)+", "+m.loc.lng.toFixed(5) : "tidak dibagikan"}<br>${esc(p?.name||"Dia")}: ${p?.loc ? p.loc.lat.toFixed(5)+", "+p.loc.lng.toFixed(5) : "tidak dibagikan"}`;
+    }
+    return;
+  }
+  const pts = [];
+  const set = (mk, loc, txt, cls) => { if (!loc) { if (mk) map.removeLayer(mk); return null; } const ll=[loc.lat,loc.lng]; pts.push(ll); if (mk) { mk.setLatLng(ll); return mk; } return L.marker(ll,{icon:pinIcon(txt,cls), title:txt}).addTo(map); };
+  mkMe = set(mkMe, m.loc, (m.name[0]||"A").toUpperCase(), "me");
+  mkPt = set(mkPt, p?.loc, ((p?.name||"D")[0]).toUpperCase(), "");
+  if (line) { map.removeLayer(line); line = null; }
+  if (pts.length === 2) line = L.polyline(pts, { color: cssVar("--raspberry"), weight:4, dashArray:"8 8" }).addTo(map);
+  if (fit && pts.length) pts.length===2 ? map.fitBounds(pts, {padding:[40,40], maxZoom:16}) : map.setView(pts[0], 15);
+  fb.hidden = !!pts.length; if (!pts.length) fb.textContent = "Belum ada lokasi yang dibagikan.";
+}
+
+/* ================== BATERAI ================== */
+let lastBat = "";
+async function initBattery(){
+  const send = async data => { const k = JSON.stringify(data); if (k === lastBat) return; lastBat = k; try { await update("battery", data); } catch {} };
+  if (!navigator.getBattery) { send({available:false}); return; }
+  try {
+    const b = await navigator.getBattery();
+    const push = () => send({ available:true, level: Math.round(b.level*100)/100, charging: b.charging });
+    b.addEventListener("levelchange", push); b.addEventListener("chargingchange", push); push();
+  } catch { send({available:false}); }
+}
+
+/* ================== PENGATURAN ================== */
+$("#openSettings").onclick = () => { $("#dsCode").textContent = session.code; $("#dsName").value = me()?.name||""; $("#dsStart").value = S?.startDate||""; $("#dlgSettings").showModal(); };
+$("#setStart").onclick = $("#openSettings").onclick;
+$("#dsSave").onclick = async () => {
+  try {
+    await update("profile", { name: $("#dsName").value, startDate: $("#dsStart").value || null });
+    session.name = me().name; localStorage.setItem(LS, JSON.stringify(session));
+    $("#dlgSettings").close(); toast("Tersimpan");
+    if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+  } catch(err){ toast(err.message,true); }
+};
+$("#dsLeave").onclick = async () => {
+  if (!confirm("Yakin keluar dari ruang? Data lokal di perangkat ini akan dihapus.")) return;
+  try { await api("/api/leave", {}); } catch {}
+  logoutLocal();
+};
+function logoutLocal(){
+  stopPolling(); if (watchId!=null) navigator.geolocation.clearWatch(watchId); watchId=null;
+  Object.keys(localStorage).filter(k => k.startsWith("duahati.")).forEach(k => localStorage.removeItem(k));
+  session = null; S = null;
+  $$("dialog[open]").forEach(d=>d.close());
+  $("#app").hidden = true; $("#nav").hidden = true; $("#welcome").hidden = false;
+  toast("Kamu sudah keluar dari ruang");
+}
+
+/* ----- PWA install ----- */
+let deferredPrompt = null;
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; $("#installBtn").hidden = false; });
+$("#installBtn").onclick = async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $("#installBtn").hidden = true; };
+addEventListener("appinstalled", () => toast("Aplikasi terpasang ♥"));
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+
+/* ================== POLLING ================== */
+let pollT = null;
+async function poll(){
+  try { applyState(await api("/api/state")); }
+  catch(err){ if (err.status===403 || err.status===404) { toast("Sesi tidak valid atau ruang sudah dihapus", true); logoutLocal(); return; } }
+  pollT = setTimeout(poll, POLL_MS);
+}
+function startPolling(){ stopPolling(); poll(); }
+function stopPolling(){ clearTimeout(pollT); pollT = null; }
+document.addEventListener("visibilitychange", () => { if (!session) return; document.hidden ? stopPolling() : startPolling(); });
+setInterval(() => S && render(), 60000); // perbarui teks "x menit lalu"
+
+/* ================== START ================== */
+async function startApp(){
+  $("#welcome").hidden = true; $("#app").hidden = false; $("#nav").hidden = false;
+  showTab("home");
+  try { applyState(await api("/api/state")); } catch(err){ if (err.status===403||err.status===404) { logoutLocal(); toast("Sesi tidak valid", true); return; } toast(err.message,true); }
+  pollT = setTimeout(poll, POLL_MS);
+  initBattery();
+  if (localStorage.getItem("duahati.share") && localStorage.getItem("duahati.locOk")) startWatch();
+}
+$("#mq").textContent = MARQUEE.repeat(6);
+if (session) startApp(); else { $("#welcome").hidden = false; setMode(false); }
+</script>
+</body>
+</html>
